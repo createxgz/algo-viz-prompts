@@ -35,8 +35,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.75;
   overflow-x: hidden;
 }
 
@@ -90,7 +90,7 @@ nav {
 
 .nav-links a {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text2);
   text-decoration: none;
   letter-spacing: 0.1em;
@@ -147,7 +147,7 @@ nav {
 }
 
 .hero-sub {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text2);
   max-width: 560px;
   line-height: 1.9;
@@ -156,7 +156,7 @@ nav {
 
 .hero-meta {
   display: flex; flex-wrap: wrap; gap: 2rem;
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: 12px;
   color: var(--text3);
   margin-bottom: 3.5rem;
 }
@@ -230,13 +230,13 @@ nav {
 .stat:last-child { border-right: none; }
 
 .stat-num {
-  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  font-family: var(--mono); font-size: 32px; font-weight: 700;
   color: var(--accent); line-height: 1;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-family: var(--mono); font-size: 10px;
+  font-family: var(--mono); font-size: 11px;
   color: var(--text3); letter-spacing: 0.15em;
   text-transform: uppercase;
 }
@@ -253,12 +253,12 @@ nav {
 }
 
 .sec-num {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: 12px;
   color: var(--text3); letter-spacing: 0.2em;
 }
 
 .sec-title {
-  font-family: var(--mono); font-size: 20px;
+  font-family: var(--mono); font-size: 22px;
   color: #fff; font-weight: 600;
 }
 
@@ -295,17 +295,17 @@ nav {
 .idea-card:hover::before { height: 100%; }
 
 .idea-index {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: 12px;
   color: var(--text3); margin-bottom: 1rem;
   letter-spacing: 0.1em;
 }
 
 .idea-title {
-  font-size: 15px; font-weight: 500;
+  font-size: 16px; font-weight: 500;
   color: #fff; margin-bottom: 0.75rem;
 }
 
-.idea-body { color: var(--text2); font-size: 13px; line-height: 1.8; }
+.idea-body { color: var(--text2); font-size: 14px; line-height: 1.85; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
@@ -314,7 +314,7 @@ nav {
 }
 
 .filter-btn {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: 12px;
   padding: 6px 16px; border-radius: 2px;
   border: 1px solid var(--border);
   background: transparent; color: var(--text2);
@@ -332,22 +332,24 @@ nav {
 .algo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
+  gap: 14px;
+  background: transparent;
+  border: none;
 }
 
 .algo-card {
   background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
   padding: 1.5rem;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.2s;
   text-decoration: none;
   display: block;
   position: relative;
 }
 
-.algo-card:hover { background: var(--bg3); }
+.algo-card:hover { background: var(--bg3); border-color: var(--border2); }
 
 .algo-card.coming {
   opacity: 0.45; cursor: default; pointer-events: none;
@@ -359,7 +361,7 @@ nav {
 }
 
 .algo-chapter {
-  font-family: var(--mono); font-size: 10px;
+  font-family: var(--mono); font-size: 11px;
   color: var(--text3); letter-spacing: 0.12em;
 }
 
@@ -380,12 +382,12 @@ nav {
 }
 
 .algo-name {
-  font-size: 14px; font-weight: 500; color: #e8edf5;
+  font-size: 15px; font-weight: 500; color: #e8edf5;
   margin-bottom: 0.4rem;
 }
 
 .algo-desc {
-  font-size: 12px; color: var(--text2); line-height: 1.7;
+  font-size: 13px; color: var(--text2); line-height: 1.75;
 }
 
 .algo-tags {
@@ -393,7 +395,7 @@ nav {
 }
 
 .algo-tag {
-  font-family: var(--mono); font-size: 10px;
+  font-family: var(--mono); font-size: 11px;
   padding: 2px 7px; border-radius: 1px;
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
@@ -437,62 +439,36 @@ nav {
 
 .algo-card:hover::after { opacity: 1; }
 
-/* ── PATH SPEC ── */
-.path-block {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 2px; overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.path-header {
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text3); letter-spacing: 0.1em;
-  background: var(--bg3);
-}
-
-.path-body {
-  padding: 1.5rem;
-  font-family: var(--mono); font-size: 13px;
-  line-height: 2.4; color: var(--text2);
-}
-
-.path-body .root { color: var(--accent); font-weight: 600; }
-.path-body .dir  { color: var(--accent2); }
-.path-body .file { color: var(--text); }
-.path-body .note { color: var(--text3); }
-.path-body .hl   { color: var(--accent4); }
-
 /* ── TEAM ── */
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
 .team-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 2px; padding: 1.25rem;
+  border-radius: 2px; padding: 2rem;
   transition: border-color 0.2s;
+  display: flex; flex-direction: column;
 }
 
 .team-card:hover { border-color: var(--border2); }
 
 .team-avatar {
-  width: 40px; height: 40px; border-radius: 2px;
+  width: 48px; height: 48px; border-radius: 2px;
   background: var(--bg4);
   border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 14px;
-  color: var(--accent); margin-bottom: 0.9rem;
+  font-family: var(--mono); font-size: 16px;
+  color: var(--accent); margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
-.team-name { font-size: 14px; font-weight: 500; color: #fff; }
-.team-role { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 3px; }
-.team-bio { font-size: 11px; color: var(--text2); margin-top: 8px; line-height: 1.6; }
+.team-name { font-size: 15px; font-weight: 500; color: #fff; }
+.team-role { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 4px; }
+.team-bio { font-size: 12px; color: var(--text2); margin-top: 12px; line-height: 1.7; }
 
 /* ── FOOTER ── */
 footer {
@@ -569,6 +545,7 @@ footer {
   .stats-row { flex-direction: column; width: 100%; }
   .stat { border-right: none; border-bottom: 1px solid var(--border); }
   .stat:last-child { border-bottom: none; }
+  .team-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -581,7 +558,6 @@ footer {
     <li><a href="#intro">介绍</a></li>
     <li><a href="#ideas">核心理念</a></li>
     <li><a href="#gallery">算法库</a></li>
-    <li><a href="#paths">路径规范</a></li>
     <li><a href="#team">团队</a></li>
   </ul>
 </nav>
@@ -1114,101 +1090,10 @@ footer {
 
 <hr class="divider z1">
 
-<!-- PATH SPEC -->
-<div class="section z1" id="paths">
-  <div class="sec-header">
-    <span class="sec-num">// 03</span>
-    <span class="sec-title">标准路径规范</span>
-    <div class="sec-line"></div>
-  </div>
-
-  <p style="color:var(--text2); margin-bottom:2rem; font-size:13px; line-height:1.9;">
-    以下为部署至服务器后的标准路径设计，所有页面跳转链接均依照此结构填写。
-    部署时请保持目录结构与仓库一致，index.html 置于根目录即可直接生效。
-  </p>
-
-  <div class="path-block">
-    <div class="path-header">// 服务器部署根目录结构</div>
-    <div class="path-body">
-<span class="root">https://your-domain.com/algo-viz/</span>
-<span class="note">                                      ← 站点根目录</span>
-│
-<span class="dir">├── index.html</span>                           <span class="note">← 本总览页面</span>
-│
-<span class="dir">├── visualizations/</span>
-│   <span class="dir">├── 01_string/</span>
-│   │   <span class="file">├── palindrome.html</span>              <span class="note">← /algo-viz/visualizations/01_string/palindrome.html</span>
-│   │   <span class="file">├── reverse_string.html</span>
-│   │   <span class="file">├── fibonacci.html</span>
-│   │   <span class="file">├── is_prime.html</span>
-│   │   <span class="file">├── two_sum.html</span>
-│   │   <span class="file">└── first_unique.html</span>
-│   <span class="dir">├── 02_recursive/</span>
-│   │   <span class="file">├── hanoi.html</span>
-│   │   <span class="file">├── permutation.html</span>
-│   │   <span class="file">├── binary_search.html</span>
-│   │   <span class="file">├── merge_sort.html</span>
-│   │   <span class="file">└── quick_sort.html</span>
-│   <span class="dir">├── 03_dp/</span>
-│   │   <span class="file">├── knapsack.html</span>
-│   │   <span class="file">├── climbing_stairs.html</span>
-│   │   <span class="file">├── lcs.html</span>
-│   │   <span class="file">└── edit_distance.html</span>
-│   <span class="dir">├── 04_greedy/</span>
-│   │   <span class="file">├── huffman.html</span>
-│   │   <span class="file">└── dijkstra.html</span>
-│   <span class="dir">├── 05_backtracking/</span>
-│   │   <span class="file">├── n_queens.html</span>
-│   │   <span class="file">└── tsp.html</span>
-│   <span class="dir">├── 06_random/</span>
-│   │   <span class="file">├── fisher_yates.html</span>
-│   │   <span class="file">└── captcha.html</span>
-│   <span class="dir">├── 07_math/</span>
-│   │   <span class="file">├── fast_power.html</span>
-│   │   <span class="file">└── sieve.html</span>
-│   <span class="dir">└── 08_others/</span>
-│       <span class="file">├── dutch_flag.html</span>
-│       <span class="file">├── bracket_match.html</span>
-│       <span class="file">└── flood_fill.html</span>
-    </div>
-  </div>
-
-  <div class="path-block">
-    <div class="path-header">// 单个算法页面的完整 URL 示例</div>
-    <div class="path-body">
-<span class="note"># 总览页</span>
-<span class="hl">https://your-domain.com/algo-viz/index.html</span>
-
-<span class="note"># 汉诺塔演示</span>
-<span class="hl">https://your-domain.com/algo-viz/visualizations/02_recursive/hanoi.html</span>
-
-<span class="note"># N 皇后演示</span>
-<span class="hl">https://your-domain.com/algo-viz/visualizations/05_backtracking/n_queens.html</span>
-
-<span class="note"># 规律：域名 / 站点前缀 / visualizations / 章节目录 / 算法文件名.html</span>
-    </div>
-  </div>
-
-  <div class="path-block">
-    <div class="path-header">// index.html 中各卡片 href 填写规范（相对路径）</div>
-    <div class="path-body">
-<span class="note"># index.html 与 visualizations/ 同级时，使用相对路径：</span>
-href=<span class="hl">"./visualizations/01_string/palindrome.html"</span>
-href=<span class="hl">"./visualizations/02_recursive/hanoi.html"</span>
-href=<span class="hl">"./visualizations/03_dp/knapsack.html"</span>
-
-<span class="note"># 后续新增算法只需按章节放入对应目录，然后在 index.html 中追加卡片即可</span>
-    </div>
-  </div>
-
-</div>
-
-<hr class="divider z1">
-
 <!-- TEAM -->
 <div class="section z1" id="team">
   <div class="sec-header">
-    <span class="sec-num">// 04</span>
+    <span class="sec-num">// 03</span>
     <span class="sec-title">团队成员</span>
     <div class="sec-line"></div>
   </div>
@@ -1256,7 +1141,7 @@ href=<span class="hl">"./visualizations/03_dp/knapsack.html"</span>
       <div class="team-role">核心开发 · 研一</div>
       <div class="team-bio">负责交互式可视化页面开发与跨浏览器兼容性测试，算法动画效果调优。</div>
     </div>
-    <div class="team-card" style="border-style:dashed; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:110px;">
+    <div class="team-card" style="border-style:dashed; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:110px; grid-column: 1 / -1;">
       <div style="font-family:var(--mono); font-size:11px; color:var(--text3); text-align:center; line-height:2;">安徽理工大学<br>计算机科学与工程学院</div>
     </div>
   </div>
