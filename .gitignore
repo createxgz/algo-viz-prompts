@@ -1,0 +1,19 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+
+# Java 编译产物
+*.class
+*.jar
+target/
+
+# Node（如后续有构建工具）
+node_modules/
+
+# 临时文件
+*.tmp
+*.bak
