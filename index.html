@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交互式可视化算法案例集</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #07090f;
+  --bg2:       #0d1018;
+  --bg3:       #131720;
+  --bg4:       #1a1f2e;
+  --border:    rgba(0,224,180,0.1);
+  --border2:   rgba(0,224,180,0.2);
+  --text:      #cdd6e8;
+  --text2:     #7a8898;
+  --text3:     #3d4858;
+  --accent:    #00e4b4;
+  --accent-d:  #00b890;
+  --accent2:   #4da8ff;
+  --accent3:   #ff6b8a;
+  --accent4:   #ffd166;
+  --glow:      rgba(0,228,180,0.08);
+  --glow2:     rgba(0,228,180,0.04);
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Noto Sans SC', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── GRID BG ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,228,180,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,228,180,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+/* scan line */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none; z-index: 0;
+}
+
+.z1 { position: relative; z-index: 1; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem;
+  height: 56px;
+  background: rgba(7,9,15,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex; gap: 2rem; list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start;
+  padding: 8rem 3rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  position: relative;
+}
+
+.hero-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 32px; height: 1px;
+  background: var(--accent);
+}
+
+.hero h1 {
+  font-family: var(--mono);
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+
+.hero h1 .line2 {
+  display: block;
+  color: var(--accent);
+  font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  margin-top: 0.3rem;
+}
+
+.hero-sub {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  line-height: 1.9;
+  margin-bottom: 3rem;
+}
+
+.hero-meta {
+  display: flex; flex-wrap: wrap; gap: 2rem;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 3.5rem;
+}
+
+.hero-meta span { color: var(--text2); }
+.hero-meta b { color: var(--accent); font-weight: 400; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--bg); background: var(--accent);
+  padding: 12px 28px; border: none; border-radius: 2px;
+  cursor: pointer; text-decoration: none;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover { background: var(--accent-d); transform: translateY(-1px); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--accent);
+  padding: 12px 28px;
+  border: 1px solid var(--border2); border-radius: 2px;
+  cursor: pointer; text-decoration: none;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+  margin-left: 12px;
+}
+
+.btn-ghost:hover { background: var(--glow); border-color: var(--accent); }
+
+/* corner decoration */
+.hero-corner {
+  position: absolute; top: 9rem; right: 3rem;
+  width: 220px; height: 220px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.5;
+}
+
+.hero-corner::before {
+  content: '';
+  position: absolute; top: 12px; left: 12px; right: 12px; bottom: 12px;
+  border: 1px solid var(--border);
+}
+
+.corner-text {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--accent); letter-spacing: 0.15em;
+  text-align: center; line-height: 2.2;
+}
+
+/* stats row */
+.stats-row {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 2px; overflow: hidden;
+  width: fit-content;
+  margin-top: 3rem;
+}
+
+.stat {
+  padding: 1rem 2rem;
+  border-right: 1px solid var(--border);
+  background: var(--glow2);
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-num {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  color: var(--accent); line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ── SECTION COMMON ── */
+.section {
+  max-width: 1100px; margin: 0 auto;
+  padding: 5rem 3rem;
+}
+
+.sec-header {
+  display: flex; align-items: baseline; gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.sec-num {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 0.2em;
+}
+
+.sec-title {
+  font-family: var(--mono); font-size: 20px;
+  color: #fff; font-weight: 600;
+}
+
+.sec-line {
+  flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── CORE IDEAS ── */
+.ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.idea-card {
+  background: var(--bg2);
+  padding: 2rem;
+  transition: background 0.2s;
+  position: relative; overflow: hidden;
+}
+
+.idea-card:hover { background: var(--bg3); }
+
+.idea-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 2px; height: 0;
+  background: var(--accent);
+  transition: height 0.3s ease;
+}
+
+.idea-card:hover::before { height: 100%; }
+
+.idea-index {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.idea-title {
+  font-size: 15px; font-weight: 500;
+  color: #fff; margin-bottom: 0.75rem;
+}
+
+.idea-body { color: var(--text2); font-size: 13px; line-height: 1.8; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  font-family: var(--mono); font-size: 11px;
+  padding: 6px 16px; border-radius: 2px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--text2);
+  cursor: pointer; letter-spacing: 0.08em;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--glow);
+}
+
+/* ── ALGO GRID ── */
+.algo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.algo-card {
+  background: var(--bg2);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  display: block;
+  position: relative;
+}
+
+.algo-card:hover { background: var(--bg3); }
+
+.algo-card.coming {
+  opacity: 0.45; cursor: default; pointer-events: none;
+}
+
+.algo-card-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 0.75rem;
+}
+
+.algo-chapter {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 0.12em;
+}
+
+.algo-badge {
+  font-family: var(--mono); font-size: 9px;
+  padding: 2px 8px; border-radius: 1px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.badge-live {
+  color: var(--accent); border: 1px solid rgba(0,228,180,0.3);
+  background: rgba(0,228,180,0.06);
+}
+
+.badge-soon {
+  color: var(--text3); border: 1px solid var(--border);
+  background: transparent;
+}
+
+.algo-name {
+  font-size: 14px; font-weight: 500; color: #e8edf5;
+  margin-bottom: 0.4rem;
+}
+
+.algo-desc {
+  font-size: 12px; color: var(--text2); line-height: 1.7;
+}
+
+.algo-tags {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 0.9rem;
+}
+
+.algo-tag {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 7px; border-radius: 1px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: var(--text3);
+}
+
+.algo-card:hover .algo-tag {
+  border-color: var(--border2);
+  color: var(--text2);
+}
+
+.algo-arrow {
+  position: absolute; bottom: 1.25rem; right: 1.25rem;
+  font-family: var(--mono); font-size: 14px;
+  color: var(--text3);
+  transition: color 0.15s, transform 0.15s;
+}
+
+.algo-card:hover .algo-arrow {
+  color: var(--accent); transform: translate(2px, -2px);
+}
+
+/* category color accents */
+.cat-0 { --cat: #00e4b4; }
+.cat-1 { --cat: #4da8ff; }
+.cat-2 { --cat: #ffd166; }
+.cat-3 { --cat: #ff6b8a; }
+.cat-4 { --cat: #c084fc; }
+.cat-5 { --cat: #34d399; }
+.cat-6 { --cat: #f97316; }
+.cat-7 { --cat: #60a5fa; }
+
+.algo-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--cat, var(--border));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.algo-card:hover::after { opacity: 1; }
+
+/* ── PATH SPEC ── */
+.path-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px; overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.path-header {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 0.1em;
+  background: var(--bg3);
+}
+
+.path-body {
+  padding: 1.5rem;
+  font-family: var(--mono); font-size: 13px;
+  line-height: 2.4; color: var(--text2);
+}
+
+.path-body .root { color: var(--accent); font-weight: 600; }
+.path-body .dir  { color: var(--accent2); }
+.path-body .file { color: var(--text); }
+.path-body .note { color: var(--text3); }
+.path-body .hl   { color: var(--accent4); }
+
+/* ── TEAM ── */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.team-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px; padding: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.team-card:hover { border-color: var(--border2); }
+
+.team-avatar {
+  width: 40px; height: 40px; border-radius: 2px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 14px;
+  color: var(--accent); margin-bottom: 0.9rem;
+}
+
+.team-name { font-size: 14px; font-weight: 500; color: #fff; }
+.team-role { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 3px; }
+.team-bio { font-size: 11px; color: var(--text2); margin-top: 8px; line-height: 1.6; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem;
+  max-width: 1100px; margin: 0 auto;
+  display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 1.5rem;
+}
+
+.footer-brand {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--accent);
+}
+
+.footer-info {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); line-height: 2;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.d1 { animation-delay: 0.1s; }
+.d2 { animation-delay: 0.2s; }
+.d3 { animation-delay: 0.35s; }
+.d4 { animation-delay: 0.5s; }
+.d5 { animation-delay: 0.65s; }
+
+/* search */
+.search-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  width: 100%; max-width: 400px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 10px 16px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus { border-color: var(--border2); }
+
+/* hidden */
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  .hero { padding: 7rem 1.5rem 3rem; }
+  .hero-corner { display: none; }
+  .section { padding: 3rem 1.5rem; }
+  footer { padding: 2rem 1.5rem; }
+  .stats-row { flex-direction: column; width: 100%; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="z1">
+  <a href="#" class="nav-brand">algo-viz-prompts</a>
+  <ul class="nav-links">
+    <li><a href="#intro">介绍</a></li>
+    <li><a href="#ideas">核心理念</a></li>
+    <li><a href="#gallery">算法库</a></li>
+    <li><a href="#paths">路径规范</a></li>
+    <li><a href="#team">团队</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero z1" id="intro">
+
+  <div class="hero-corner">
+    <div class="corner-text">
+      AUST<br>
+      ALGO<br>
+      VIZ<br>
+      2026
+    </div>
+  </div>
+
+  <div class="hero-label fade-up d1">安徽理工大学 · 教学案例集</div>
+
+  <h1 class="fade-up d2">
+    交互式可视化
+    <span class="line2">算法程序设计案例集</span>
+  </h1>
+
+  <p class="hero-sub fade-up d3">
+    用 AI 生成的赛博朋克风格交互演示，将抽象算法执行逻辑转化为可操控的视觉反馈。
+    每一个案例，都是一次对算法本质的沉浸式解读。
+  </p>
+
+  <div class="hero-meta fade-up d3">
+    <div>课程 &nbsp;<b>数据结构与算法</b></div>
+    <div>语言 &nbsp;<b>Java</b></div>
+    <div>平台 &nbsp;<b>Browser / HTML5</b></div>
+    <div>风格 &nbsp;<b>Cyberpunk Interactive</b></div>
+  </div>
+
+  <div class="fade-up d4">
+    <a href="#gallery" class="btn-primary">浏览算法库 →</a>
+    <a href="https://github.com/your-org/algo-viz-prompts" class="btn-ghost" target="_blank">GitHub ↗</a>
+  </div>
+
+  <div class="stats-row fade-up d5">
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Algorithm Chapters</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">50<span style="font-size:18px;font-weight:300">+</span></div>
+      <div class="stat-label">Case Studies</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">AI</div>
+      <div class="stat-label">Powered Viz</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Open Source</div>
+    </div>
+  </div>
+
+</section>
+
+<hr class="divider z1">
+
+<!-- CORE IDEAS -->
+<div class="section z1" id="ideas">
+  <div class="sec-header">
+    <span class="sec-num">// 01</span>
+    <span class="sec-title">核心理念</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="ideas-grid">
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 01</div>
+      <div class="idea-title">可视化即理解</div>
+      <div class="idea-body">算法不应只存在于纸面。当执行状态被转化为动态的视觉反馈——数组的比较、指针的移动、树的生长——抽象逻辑才真正变得可感知、可记忆。</div>
+    </div>
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 02</div>
+      <div class="idea-title">AI 是学习的放大镜</div>
+      <div class="idea-body">借助精准的提示词，任何学习者都可以让 AI 为任意算法生成交互演示页面。不需要前端经验，只需要理解算法本身——AI 负责表达，你负责理解。</div>
+    </div>
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 03</div>
+      <div class="idea-title">案例驱动，由浅入深</div>
+      <div class="idea-body">从回文判断到旅行商问题，每个案例均拆解问题背景、核心思路与代码逻辑，配合交互演示，形成"看懂 → 想透 → 写出"的完整学习闭环。</div>
+    </div>
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 04</div>
+      <div class="idea-title">工程视野，实战导向</div>
+      <div class="idea-body">内容不止于教材习题，涵盖 CAPTCHA 生成、图形验证码识别等真实工程场景，帮助学习者建立"算法如何在真实系统中落地"的工程直觉。</div>
+    </div>
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 05</div>
+      <div class="idea-title">赛博朋克美学</div>
+      <div class="idea-body">拒绝枯燥。深色背景、荧光扫描线、像素级动效——让算法演示本身成为一种视觉体验，用沉浸感对抗学习疲劳，让每次调试都带有科技仪式感。</div>
+    </div>
+    <div class="idea-card">
+      <div class="idea-index">IDEA · 06</div>
+      <div class="idea-title">开源共创，持续生长</div>
+      <div class="idea-body">所有提示词模板、HTML 源码、Java 实现全部开源。学习者不只是消费者，也可以贡献自己生成的演示页面，让资源库随社区共同扩充。</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider z1">
+
+<!-- ALGORITHM GALLERY -->
+<div class="section z1" id="gallery">
+  <div class="sec-header">
+    <span class="sec-num">// 02</span>
+    <span class="sec-title">算法演示库</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="搜索算法名称..." id="searchInput">
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="0">CH·01 算法入门</button>
+    <button class="filter-btn" data-filter="1">CH·02 递归与分治</button>
+    <button class="filter-btn" data-filter="2">CH·03 动态规划</button>
+    <button class="filter-btn" data-filter="3">CH·04 贪婪法</button>
+    <button class="filter-btn" data-filter="4">CH·05 回溯与分支限界</button>
+    <button class="filter-btn" data-filter="5">CH·06 随机算法</button>
+    <button class="filter-btn" data-filter="6">CH·07 数学方法</button>
+    <button class="filter-btn" data-filter="7">CH·08 其他方法</button>
+  </div>
+
+  <div class="algo-grid" id="algoGrid">
+    <!-- CH01 -->
+    <a class="algo-card cat-0" data-cat="0" data-name="判断字符串是否为回文" href="./visualizations/01_string/palindrome.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">判断字符串是否为回文</div>
+      <div class="algo-desc">双指针从两端向中心收缩，逐字符比对，O(n) 时间完成回文判定。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">字符串</span>
+        <span class="algo-tag">双指针</span>
+        <span class="algo-tag">O(n)</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-0" data-cat="0" data-name="反转字符串" href="./visualizations/01_string/reverse_string.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">反转字符串</div>
+      <div class="algo-desc">原地交换首尾字符，展示指针对撞过程中每一步的状态变化。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">字符串</span>
+        <span class="algo-tag">双指针</span>
+        <span class="algo-tag">原地操作</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-0" data-cat="0" data-name="斐波那契数列" href="./visualizations/01_string/fibonacci.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">斐波那契数列</div>
+      <div class="algo-desc">对比递归与迭代两种实现，直观展示指数级调用栈与线性计算的效率差异。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">递归</span>
+        <span class="algo-tag">迭代</span>
+        <span class="algo-tag">记忆化</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-0" data-cat="0" data-name="判断质数" href="./visualizations/01_string/is_prime.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">判断一个数是否是质数</div>
+      <div class="algo-desc">从试除法到 √n 优化，逐步演示整除检验过程与复杂度改进。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">数论</span>
+        <span class="algo-tag">√n 优化</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-0" data-cat="0" data-name="两数之和" href="./visualizations/01_string/two_sum.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">两数之和（数组）</div>
+      <div class="algo-desc">哈希表一次遍历，动态展示 Map 的写入与查找，O(n) vs O(n²) 暴力对比。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">哈希表</span>
+        <span class="algo-tag">O(n)</span>
+        <span class="algo-tag">LeetCode</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-0" data-cat="0" data-name="第一个不重复字符" href="./visualizations/01_string/first_unique.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·01 · 算法入门</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">字符串中第一个不重复字符</div>
+      <div class="algo-desc">两次遍历：先统计频次，再找首个频次为 1 的字符，可视化频次表的构建过程。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">哈希表</span>
+        <span class="algo-tag">字符串</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH02 -->
+    <a class="algo-card cat-1" data-cat="1" data-name="汉诺塔问题" href="./visualizations/02_recursive/hanoi.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·02 · 递归与分治</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">汉诺塔问题</div>
+      <div class="algo-desc">三柱实时动画，每一步递归调用都对应一次圆盘移动，直观呈现 2ⁿ−1 步的生成过程。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">递归</span>
+        <span class="algo-tag">分治</span>
+        <span class="algo-tag">经典</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-1" data-cat="1" data-name="全排列" href="./visualizations/02_recursive/permutation.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·02 · 递归与分治</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">全排列（递归 + 回溯）</div>
+      <div class="algo-desc">搜索树实时展开，节点着色区分已选 / 待选 / 回溯状态，清晰呈现 n! 路径的生成逻辑。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">递归</span>
+        <span class="algo-tag">回溯</span>
+        <span class="algo-tag">搜索树</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-1" data-cat="1" data-name="二分查找" href="./visualizations/02_recursive/binary_search.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·02 · 递归与分治</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">二分查找</div>
+      <div class="algo-desc">数组区间可视化收缩，逐步高亮 left / mid / right 指针，演示 O(log n) 的搜索威力。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">查找</span>
+        <span class="algo-tag">O(log n)</span>
+        <span class="algo-tag">分治</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-1" data-cat="1" data-name="归并排序" href="./visualizations/02_recursive/merge_sort.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·02 · 递归与分治</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">合并排序</div>
+      <div class="algo-desc">分裂与合并两阶段分层动画，辅助数组的写入过程逐帧可见，完整展示 O(n log n) 分治排序。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">排序</span>
+        <span class="algo-tag">分治</span>
+        <span class="algo-tag">O(n log n)</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-1" data-cat="1" data-name="快速排序" href="./visualizations/02_recursive/quick_sort.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·02 · 递归与分治</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">快速排序</div>
+      <div class="algo-desc">pivot 选取、分区交换、递归下探，三色高亮区分小 / 等 / 大三区，实时展示原地排序过程。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">排序</span>
+        <span class="algo-tag">分治</span>
+        <span class="algo-tag">原地</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH03 -->
+    <a class="algo-card cat-2" data-cat="2" data-name="背包问题" href="./visualizations/03_dp/knapsack.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·03 · 动态规划</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">背包问题</div>
+      <div class="algo-desc">dp 表格逐格填充，每次状态转移都高亮来源单元格，直观演示"选与不选"的决策过程。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">DP</span>
+        <span class="algo-tag">状态转移</span>
+        <span class="algo-tag">经典</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-2" data-cat="2" data-name="爬楼梯问题" href="./visualizations/03_dp/climbing_stairs.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·03 · 动态规划</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">爬楼梯问题</div>
+      <div class="algo-desc">阶梯图动态生长，逐步叠加每级台阶的路径数，展示 DP 与斐波那契的内在联系。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">DP</span>
+        <span class="algo-tag">入门</span>
+        <span class="algo-tag">LeetCode</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-2" data-cat="2" data-name="最长公共子序列" href="./visualizations/03_dp/lcs.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·03 · 动态规划</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">最长公共子序列 LCS</div>
+      <div class="algo-desc">二维 dp 矩阵逐行填充，相等字符时对角线来源高亮，回溯路径实时标注。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">DP</span>
+        <span class="algo-tag">字符串</span>
+        <span class="algo-tag">二维表</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-2" data-cat="2" data-name="编辑距离" href="./visualizations/03_dp/edit_distance.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·03 · 动态规划</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">编辑距离</div>
+      <div class="algo-desc">插入 / 删除 / 替换三种操作的 dp 矩阵，着色展示每步最优操作的选择依据。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">DP</span>
+        <span class="algo-tag">字符串</span>
+        <span class="algo-tag">LeetCode 72</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH04 -->
+    <a class="algo-card cat-3" data-cat="3" data-name="哈夫曼编码" href="./visualizations/04_greedy/huffman.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·04 · 贪婪法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">哈夫曼编码</div>
+      <div class="algo-desc">优先队列驱动的树构建动画，每次合并最小权重节点，最终生成最优前缀编码树。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">贪心</span>
+        <span class="algo-tag">堆</span>
+        <span class="algo-tag">编码</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-3" data-cat="3" data-name="Dijkstra单源最短路径" href="./visualizations/04_greedy/dijkstra.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·04 · 贪婪法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">单源最短路径 Dijkstra</div>
+      <div class="algo-desc">图节点逐步松弛，已确定节点变色，路径权重实时更新，贪心选择过程一目了然。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">图论</span>
+        <span class="algo-tag">贪心</span>
+        <span class="algo-tag">最短路</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH05 -->
+    <a class="algo-card cat-4" data-cat="4" data-name="N皇后问题" href="./visualizations/05_backtracking/n_queens.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·05 · 回溯与分支限界</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">N 皇后问题</div>
+      <div class="algo-desc">棋盘实时着棋与冲突检测，回溯时红色闪烁清除，每条合法路径逐步亮起。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">回溯</span>
+        <span class="algo-tag">经典</span>
+        <span class="algo-tag">约束满足</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-4" data-cat="4" data-name="旅行商问题" href="./visualizations/05_backtracking/tsp.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·05 · 回溯与分支限界</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">旅行商问题 TSP</div>
+      <div class="algo-desc">城市图上的路径搜索动画，剪枝时路径变灰消退，最优路径实时高亮更新。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">回溯</span>
+        <span class="algo-tag">NP-Hard</span>
+        <span class="algo-tag">图论</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH06 -->
+    <a class="algo-card cat-5" data-cat="5" data-name="Fisher-Yates洗牌算法" href="./visualizations/06_random/fisher_yates.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·06 · 随机算法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">Fisher-Yates 洗牌算法</div>
+      <div class="algo-desc">扑克牌实时洗牌动画，每步随机交换均高亮显示，证明每种排列等概率出现。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">随机</span>
+        <span class="algo-tag">等概率</span>
+        <span class="algo-tag">O(n)</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-5" data-cat="5" data-name="图形验证码生成CAPTCHA" href="./visualizations/06_random/captcha.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·06 · 随机算法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">图形验证码生成 CAPTCHA</div>
+      <div class="algo-desc">随机噪点、扭曲变形、字符叠加的生成流程逐步演示，揭示 CAPTCHA 的安全机制原理。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">随机</span>
+        <span class="algo-tag">安全</span>
+        <span class="algo-tag">工程应用</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH07 -->
+    <a class="algo-card cat-6" data-cat="6" data-name="快速幂算法" href="./visualizations/07_math/fast_power.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·07 · 数学方法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">快速幂算法</div>
+      <div class="algo-desc">二进制拆分指数，每步平方 / 乘积决策可视化，O(log n) 替代朴素 O(n) 的过程清晰呈现。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">数论</span>
+        <span class="algo-tag">O(log n)</span>
+        <span class="algo-tag">位运算</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-6" data-cat="6" data-name="埃拉托色尼筛素数" href="./visualizations/07_math/sieve.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·07 · 数学方法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">埃拉托色尼筛选素数</div>
+      <div class="algo-desc">数字网格动态标记合数，素数逐轮发光保留，筛法全过程一次看完，美感与逻辑并存。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">数论</span>
+        <span class="algo-tag">素数</span>
+        <span class="algo-tag">O(n log log n)</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <!-- CH08 -->
+    <a class="algo-card cat-7" data-cat="7" data-name="荷兰旗问题" href="./visualizations/08_others/dutch_flag.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·08 · 其他方法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">荷兰旗问题</div>
+      <div class="algo-desc">三指针分区动画，红 / 白 / 蓝三色方块实时归位，单遍 O(n) 三路划分过程完整呈现。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">双指针</span>
+        <span class="algo-tag">分区</span>
+        <span class="algo-tag">O(n)</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-7" data-cat="7" data-name="括号匹配" href="./visualizations/08_others/bracket_match.html">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·08 · 其他方法</span>
+        <span class="algo-badge badge-live">LIVE</span>
+      </div>
+      <div class="algo-name">括号匹配</div>
+      <div class="algo-desc">栈的压栈 / 弹栈过程帧级动画，字符逐个读取，不匹配时红色警告闪烁，栈状态实时可见。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">栈</span>
+        <span class="algo-tag">字符串</span>
+        <span class="algo-tag">LeetCode 20</span>
+      </div>
+      <div class="algo-arrow">↗</div>
+    </a>
+
+    <a class="algo-card cat-7 coming" data-cat="7" data-name="泛洪填充算法" href="#">
+      <div class="algo-card-top">
+        <span class="algo-chapter">CH·08 · 其他方法</span>
+        <span class="algo-badge badge-soon">COMING SOON</span>
+      </div>
+      <div class="algo-name">泛洪填充算法 Flood Fill</div>
+      <div class="algo-desc">BFS / DFS 在像素网格上的扩散过程，逐格着色，直观演示图像填充的边界检测机制。</div>
+      <div class="algo-tags">
+        <span class="algo-tag">BFS</span>
+        <span class="algo-tag">DFS</span>
+        <span class="algo-tag">图像处理</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<hr class="divider z1">
+
+<!-- PATH SPEC -->
+<div class="section z1" id="paths">
+  <div class="sec-header">
+    <span class="sec-num">// 03</span>
+    <span class="sec-title">标准路径规范</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <p style="color:var(--text2); margin-bottom:2rem; font-size:13px; line-height:1.9;">
+    以下为部署至服务器后的标准路径设计，所有页面跳转链接均依照此结构填写。
+    部署时请保持目录结构与仓库一致，index.html 置于根目录即可直接生效。
+  </p>
+
+  <div class="path-block">
+    <div class="path-header">// 服务器部署根目录结构</div>
+    <div class="path-body">
+<span class="root">https://your-domain.com/algo-viz/</span>
+<span class="note">                                      ← 站点根目录</span>
+│
+<span class="dir">├── index.html</span>                           <span class="note">← 本总览页面</span>
+│
+<span class="dir">├── visualizations/</span>
+│   <span class="dir">├── 01_string/</span>
+│   │   <span class="file">├── palindrome.html</span>              <span class="note">← /algo-viz/visualizations/01_string/palindrome.html</span>
+│   │   <span class="file">├── reverse_string.html</span>
+│   │   <span class="file">├── fibonacci.html</span>
+│   │   <span class="file">├── is_prime.html</span>
+│   │   <span class="file">├── two_sum.html</span>
+│   │   <span class="file">└── first_unique.html</span>
+│   <span class="dir">├── 02_recursive/</span>
+│   │   <span class="file">├── hanoi.html</span>
+│   │   <span class="file">├── permutation.html</span>
+│   │   <span class="file">├── binary_search.html</span>
+│   │   <span class="file">├── merge_sort.html</span>
+│   │   <span class="file">└── quick_sort.html</span>
+│   <span class="dir">├── 03_dp/</span>
+│   │   <span class="file">├── knapsack.html</span>
+│   │   <span class="file">├── climbing_stairs.html</span>
+│   │   <span class="file">├── lcs.html</span>
+│   │   <span class="file">└── edit_distance.html</span>
+│   <span class="dir">├── 04_greedy/</span>
+│   │   <span class="file">├── huffman.html</span>
+│   │   <span class="file">└── dijkstra.html</span>
+│   <span class="dir">├── 05_backtracking/</span>
+│   │   <span class="file">├── n_queens.html</span>
+│   │   <span class="file">└── tsp.html</span>
+│   <span class="dir">├── 06_random/</span>
+│   │   <span class="file">├── fisher_yates.html</span>
+│   │   <span class="file">└── captcha.html</span>
+│   <span class="dir">├── 07_math/</span>
+│   │   <span class="file">├── fast_power.html</span>
+│   │   <span class="file">└── sieve.html</span>
+│   <span class="dir">└── 08_others/</span>
+│       <span class="file">├── dutch_flag.html</span>
+│       <span class="file">├── bracket_match.html</span>
+│       <span class="file">└── flood_fill.html</span>
+    </div>
+  </div>
+
+  <div class="path-block">
+    <div class="path-header">// 单个算法页面的完整 URL 示例</div>
+    <div class="path-body">
+<span class="note"># 总览页</span>
+<span class="hl">https://your-domain.com/algo-viz/index.html</span>
+
+<span class="note"># 汉诺塔演示</span>
+<span class="hl">https://your-domain.com/algo-viz/visualizations/02_recursive/hanoi.html</span>
+
+<span class="note"># N 皇后演示</span>
+<span class="hl">https://your-domain.com/algo-viz/visualizations/05_backtracking/n_queens.html</span>
+
+<span class="note"># 规律：域名 / 站点前缀 / visualizations / 章节目录 / 算法文件名.html</span>
+    </div>
+  </div>
+
+  <div class="path-block">
+    <div class="path-header">// index.html 中各卡片 href 填写规范（相对路径）</div>
+    <div class="path-body">
+<span class="note"># index.html 与 visualizations/ 同级时，使用相对路径：</span>
+href=<span class="hl">"./visualizations/01_string/palindrome.html"</span>
+href=<span class="hl">"./visualizations/02_recursive/hanoi.html"</span>
+href=<span class="hl">"./visualizations/03_dp/knapsack.html"</span>
+
+<span class="note"># 后续新增算法只需按章节放入对应目录，然后在 index.html 中追加卡片即可</span>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider z1">
+
+<!-- TEAM -->
+<div class="section z1" id="team">
+  <div class="sec-header">
+    <span class="sec-num">// 04</span>
+    <span class="sec-title">团队成员</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar">郝</div>
+      <div class="team-name">郝伟</div>
+      <div class="team-role">指导教师 · 日本博士</div>
+      <div class="team-bio">算法设计与可视化方向，主持项目总体架构设计与教学案例选编，负责算法正确性审定与教材编写。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">孙</div>
+      <div class="team-name">孙奥鹏</div>
+      <div class="team-role">核心开发 · 研一</div>
+      <div class="team-bio">负责前端可视化框架搭建与交互逻辑开发，赛博朋克风格主题设计及动画效果实现。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">张</div>
+      <div class="team-name">张叶鹏</div>
+      <div class="team-role">核心开发 · 研二</div>
+      <div class="team-bio">负责核心算法实现与复杂度分析，统筹 Java 源码与可视化演示的逻辑一致性校验。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">吉</div>
+      <div class="team-name">吉晨</div>
+      <div class="team-role">核心开发 · 研一</div>
+      <div class="team-bio">负责提示词工程设计与 AI 交互调优，探索不同大模型在算法可视化生成中的效果对比。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">毛</div>
+      <div class="team-name">毛羽新</div>
+      <div class="team-role">核心开发 · 研一</div>
+      <div class="team-bio">负责算法案例收集与分类整理，编写提示词模板及配套文档，维护 prompt 资源库。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">徐</div>
+      <div class="team-name">徐高泽</div>
+      <div class="team-role">核心开发 · 研一</div>
+      <div class="team-bio">负责项目工程化架构与部署运维，GitHub Pages 配置及 CI/CD 流水线搭建。</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">杨</div>
+      <div class="team-name">杨玉虎</div>
+      <div class="team-role">核心开发 · 研一</div>
+      <div class="team-bio">负责交互式可视化页面开发与跨浏览器兼容性测试，算法动画效果调优。</div>
+    </div>
+    <div class="team-card" style="border-style:dashed; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:110px;">
+      <div style="font-family:var(--mono); font-size:11px; color:var(--text3); text-align:center; line-height:2;">安徽理工大学<br>计算机科学与工程学院</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="z1">
+  <div>
+    <div class="footer-brand">algo-viz-prompts</div>
+    <div class="footer-info" style="margin-top:0.5rem;">
+      《交互式可视化的算法程序设计案例集》配套开源项目<br>
+      安徽理工大学 · 2026
+    </div>
+  </div>
+  <div class="footer-info" style="text-align:right;">
+    MIT License<br>
+    Built with AI · Cyberpunk Aesthetic<br>
+    <a href="https://github.com/your-org/algo-viz-prompts" style="color:var(--accent); text-decoration:none;">GitHub ↗</a>
+  </div>
+</footer>
+
+<script>
+// ── Filter logic
+const filterBtns = document.querySelectorAll('.filter-btn');
+const algoCards  = document.querySelectorAll('.algo-card');
+const searchInput = document.getElementById('searchInput');
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function applyFilters() {
+  algoCards.forEach(card => {
+    const cat  = card.dataset.cat;
+    const name = card.dataset.name || '';
+    const matchCat    = currentFilter === 'all' || cat === currentFilter;
+    const matchSearch = name.includes(currentSearch) ||
+      card.querySelector('.algo-desc').textContent.includes(currentSearch);
+    card.classList.toggle('hidden', !(matchCat && matchSearch));
+  });
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener('input', e => {
+  currentSearch = e.target.value.trim();
+  applyFilters();
+});
+
+// ── Smooth scroll offset for fixed nav
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      window.scrollTo({ top: target.offsetTop - 64, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
